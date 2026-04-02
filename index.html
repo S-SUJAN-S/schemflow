@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SchemFlow | Precision Schematic Annotation Tool</title>
+  <meta name="description" content="Annotate circuit diagrams and schematics online with precision using SchemFlow." />
+  <meta name="keywords" content="schematic tool, circuit annotation, pcb wiring tool, online wire editor, engineering tool, schemflow" />
+  <link rel="icon" href="favicon.ico" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="canonical" href="https://schemflow.netlify.app/" />
+  <meta property="og:title" content="SchemFlow - Precision Annotation System" />
+  <meta property="og:description" content="Annotate schematics with precision wire overlays using SchemFlow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://schemflow.netlify.app/" />
+  <meta property="og:site_name" content="SchemFlow" />
+  <meta property="og:image" content="https://schemflow.netlify.app/og-image.png" />
+  <meta property="og:image:secure_url" content="https://schemflow.netlify.app/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="SchemFlow interface preview showing engineering schematic annotation workspace" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SchemFlow - Precision Annotation System" />
+  <meta name="twitter:description" content="Annotate schematics with precision wire overlays using SchemFlow" />
+  <meta name="twitter:image" content="https://schemflow.netlify.app/og-image.png" />
+  <meta name="twitter:image:alt" content="SchemFlow interface preview showing engineering schematic annotation workspace" />
+  <meta name="twitter:url" content="https://schemflow.netlify.app/" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SchemFlow",
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "Web",
+      "description": "Annotate circuit diagrams and schematics online with precision using SchemFlow.",
+      "url": "https://schemflow.netlify.app/",
+      "image": "https://schemflow.netlify.app/og-image.png",
+      "creator": {
+        "@type": "Organization",
+        "name": "BlinkNBuild"
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --brand-primary: #00D4F5;
+      --brand-secondary: #2B6FD4;
+      --brand-accent: #F5A623;
+      --bg-base: #0f172a;
+      --bg-panel: #121e35;
+      --bg-panel-soft: #172642;
+      --border-soft: rgba(148, 163, 184, 0.24);
+      --text-strong: #e2e8f0;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+    html, body, #root { height: 100%; }
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 82% -18%, rgba(0, 212, 245, 0.1), transparent 44%),
+        var(--bg-base);
+      color: var(--text-strong);
+      font-family: "Segoe UI Variable", "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+    }
+
+    input[type=range]::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--brand-primary); cursor: pointer; border: 2px solid #ffffff; box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7), 0 2px 8px rgba(0, 212, 245, 0.3); }
+    input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--brand-primary); cursor: pointer; border: 2px solid #ffffff; box-shadow: 0 2px 8px rgba(0, 212, 245, 0.3); }
+
+    button:focus-visible,
+    input:focus-visible,
+    label:focus-within {
+      outline: 2px solid var(--brand-primary);
+      outline-offset: 2px;
+    }
+
+    .product-header {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(148, 163, 184, 0.2);
+      backdrop-filter: blur(5px);
+    }
+
+    .panel-shell {
+      background: rgba(15, 23, 42, 0.94);
+      border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    .section-divider {
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .section-divider:last-of-type {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(0, 212, 245, 0.9), rgba(43, 111, 212, 0.9));
+      color: #03141c;
+      border: 1px solid rgba(0, 212, 245, 0.35);
+      box-shadow: 0 6px 16px rgba(0, 212, 245, 0.2);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0, 212, 245, 0.24);
+      filter: brightness(1.01);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(0, 212, 245, 0.18);
+    }
+
+    .btn-secondary {
+      background: rgba(23, 38, 66, 0.78);
+      color: #dbeafe;
+      border: 1px solid rgba(43, 111, 212, 0.38);
+      transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(33, 52, 89, 0.88);
+      border-color: rgba(0, 212, 245, 0.45);
+    }
+
+    .btn-secondary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-danger {
+      background: rgba(70, 22, 30, 0.72);
+      color: #fecaca;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      transition: transform 0.16s ease, background-color 0.16s ease;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(88, 25, 35, 0.8);
+    }
+
+    .btn-danger:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .canvas-surface {
+      background-color: #0b1221;
+      background-image:
+        linear-gradient(rgba(43, 111, 212, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(43, 111, 212, 0.08) 1px, transparent 1px);
+      background-size: 30px 30px, 30px 30px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useCallback, useEffect, useRef } = React;
+
+    const APP_LIMITS = Object.freeze({
+      minZoom: 0.1,
+      maxZoom: 10,
+      zoomStep: 0.2,
+      minThickness: 1,
+      maxThickness: 50,
+      maxUploadBytes: 50 * 1024 * 1024,
+      eraseThreshold: 10,
+    });
+
+    const WireColor = Object.freeze({
+      Red: '#ef4444',
+      Black: '#000000',
+      Green: '#22c55e',
+      Blue: '#3b82f6',
+      Yellow: '#eab308',
+      White: '#ffffff',
+      Purple: '#a855f7',
+      Orange: '#f97316',
+      Cyan: '#06b6d4',
+      Pink: '#ec4899',
+      Gray: '#64748b',
+    });
+
+    const ColorNames = Object.freeze({
+      '#ef4444': 'Red',
+      '#000000': 'Black',
+      '#22c55e': 'Green',
+      '#3b82f6': 'Blue',
+      '#eab308': 'Yellow',
+      '#ffffff': 'White',
+      '#a855f7': 'Purple',
+      '#f97316': 'Orange',
+      '#06b6d4': 'Cyan',
+      '#ec4899': 'Pink',
+      '#64748b': 'Gray',
+    });
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+    const CORNER_EPSILON = 0.001;
+    const POINT_MERGE_EPSILON = 0.75;
+    const getTraceMinSpacing = (lineThickness) => Math.max(1.5, lineThickness * 0.45);
+
+    const getPointDistance = (first, second) => Math.hypot(second.x - first.x, second.y - first.y);
+
+    const shouldMergePoint = (first, second, minSpacing) => getPointDistance(first, second) < Math.max(POINT_MERGE_EPSILON, minSpacing);
+
+    const isForwardCollinear = (previous, current, next) => {
+      const inVectorX = current.x - previous.x;
+      const inVectorY = current.y - previous.y;
+      const outVectorX = next.x - current.x;
+      const outVectorY = next.y - current.y;
+
+      const inLength = Math.hypot(inVectorX, inVectorY);
+      const outLength = Math.hypot(outVectorX, outVectorY);
+      if (inLength < CORNER_EPSILON || outLength < CORNER_EPSILON) return true;
+
+      const crossMagnitude = Math.abs((inVectorX * outVectorY) - (inVectorY * outVectorX)) / (inLength * outLength);
+      const dot = (inVectorX * outVectorX) + (inVectorY * outVectorY);
+      return crossMagnitude < 0.015 && dot > 0;
+    };
+
+    const appendPointOptimized = (points, candidate, minSpacing = 0) => {
+      if (!points.length) return [candidate];
+
+      const nextPoints = [...points];
+      const lastPoint = nextPoints[nextPoints.length - 1];
+      if (shouldMergePoint(lastPoint, candidate, minSpacing)) return nextPoints;
+
+      nextPoints.push(candidate);
+
+      while (nextPoints.length >= 3) {
+        const previous = nextPoints[nextPoints.length - 3];
+        const current = nextPoints[nextPoints.length - 2];
+        const next = nextPoints[nextPoints.length - 1];
+
+        if (!isForwardCollinear(previous, current, next)) break;
+        nextPoints.splice(nextPoints.length - 2, 1);
+      }
+
+      return nextPoints;
+    };
+
+    const normalizeTracePoints = (points, minSpacing = 0) => points.reduce(
+      (accumulator, point) => appendPointOptimized(accumulator, point, minSpacing),
+      [],
+    );
+
+    const getTraceCornerRadius = (lineThickness, inLength, outLength) => {
+      const baseRadius = Math.max(6, lineThickness * 2);
+
+      // Force minimum visible radius
+      const minRadius = Math.max(4, lineThickness * 1.5);
+
+      return Math.max(
+        minRadius,
+        Math.min(baseRadius, inLength * 0.6, outLength * 0.6)
+      );
+    };
+
+    // Rounds corner joins while keeping the same underlying point geometry.
+    const traceSmoothedPath = (ctx, points, lineThickness) => {
+      if (!points.length) return;
+      if (points.length === 1) {
+        ctx.moveTo(points[0].x, points[0].y);
+        return;
+      }
+
+      ctx.moveTo(points[0].x, points[0].y);
+
+      for (let index = 1; index < points.length - 1; index += 1) {
+        const previous = points[index - 1];
+        const current = points[index];
+        const next = points[index + 1];
+
+        const inVectorX = current.x - previous.x;
+        const inVectorY = current.y - previous.y;
+        const outVectorX = next.x - current.x;
+        const outVectorY = next.y - current.y;
+
+        const inLength = Math.hypot(inVectorX, inVectorY);
+        const outLength = Math.hypot(outVectorX, outVectorY);
+
+        if (inLength < CORNER_EPSILON || outLength < CORNER_EPSILON) {
+          ctx.lineTo(current.x, current.y);
+          continue;
+        }
+
+        const inUnitX = inVectorX / inLength;
+        const inUnitY = inVectorY / inLength;
+        const outUnitX = outVectorX / outLength;
+        const outUnitY = outVectorY / outLength;
+
+        const directionDot = inUnitX * outUnitX + inUnitY * outUnitY;
+        if (Math.abs(directionDot) > 0.999) {
+          ctx.lineTo(current.x, current.y);
+          continue;
+        }
+
+        const cornerLeadExtension = Math.max(3, lineThickness * 0.6);
+        const cornerRadius = getTraceCornerRadius(lineThickness, inLength + cornerLeadExtension, outLength + cornerLeadExtension);
+        if (cornerRadius < 0.75) {
+          ctx.lineTo(current.x, current.y);
+          continue;
+        }
+
+        const cornerStartX = current.x - inUnitX * cornerRadius;
+        const cornerStartY = current.y - inUnitY * cornerRadius;
+        const cornerEndX = current.x + outUnitX * cornerRadius;
+        const cornerEndY = current.y + outUnitY * cornerRadius;
+
+        ctx.lineTo(cornerStartX, cornerStartY);
+        ctx.quadraticCurveTo(current.x, current.y, cornerEndX, cornerEndY);
+      }
+
+      const lastPoint = points[points.length - 1];
+      ctx.lineTo(lastPoint.x, lastPoint.y);
+    };
+
+    // FIX: unified smoothing pipeline
+    const drawWireTrace = (ctx, rawPoints, color, thickness, options = {}) => {
+      if (!ctx || !rawPoints.length) return;
+
+      const {
+        dashPattern = [],
+        drawNodes = true,
+        opacity = 1,
+        renderMode = 'smooth',
+      } = options;
+
+      const cleanedPoints = normalizeTracePoints(rawPoints, getTraceMinSpacing(thickness));
+      if (!cleanedPoints.length) return;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = thickness;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = opacity;
+      ctx.setLineDash(dashPattern);
+
+      if (renderMode === 'rigid') {
+        const pts = cleanedPoints;
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let index = 1; index < pts.length; index += 1) {
+          ctx.lineTo(pts[index].x, pts[index].y);
+        }
+      } else {
+        traceSmoothedPath(ctx, cleanedPoints, thickness);
+      }
+
+      ctx.stroke();
+      ctx.restore();
+
+      if (!drawNodes) return;
+    };
+
+    const isEditableElement = (target) => {
+      if (!target || !(target instanceof HTMLElement)) return false;
+      return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
+    };
+
+    const createWireId = () => {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      return `wire_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    };
+
+    const logError = (scope, error) => {
+      console.error(`[SchemFlow][${scope}]`, error);
+    };
+
+    const Header = () => (
+      <header className="product-header border-b px-8 py-4 flex items-center justify-between shrink-0 shadow-[0_4px_16px_rgba(0,0,0,0.25)] z-10 relative">
+        <div className="flex items-center gap-4">
+          <div className="bg-[#00D4F5] w-10 h-10 rounded-lg flex items-center justify-center shadow-[0_2px_10px_rgba(0,212,245,0.3)]" aria-hidden="true">
+            <svg className="w-7 h-7 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-100 tracking-tight leading-none">SchemFlow</h1>
+            <p className="text-[11px] text-slate-400 font-medium tracking-wide mt-1">by BlinkNBuild</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="hidden lg:flex flex-col items-end">
+            <span className="text-sm font-bold text-slate-200">Advanced Engine v2.6</span>
+            <span className="text-[10px] text-[#00D4F5] font-semibold tracking-wide flex items-center gap-1.5 mt-0.5">
+              <span className="w-2 h-2 bg-[#00D4F5] rounded-full"></span>
+              Operational
+            </span>
+          </div>
+        </div>
+      </header>
+    );
+
+    const Sidebar = ({
+      onUpload,
+      currentColor,
+      onColorChange,
+      thickness,
+      onThicknessChange,
+      onClear,
+      onUndo,
+      wireCount,
+      isDrawing,
+      zoom,
+      onZoomChange,
+      routingMode,
+      onRoutingModeChange,
+      renderMode,
+      setRenderMode,
+      onExport,
+      hasImage,
+      canUndo,
+      currentTool,
+      onToolChange,
+      errorMessage,
+    }) => (
+      <aside className="w-80 panel-shell border-r flex flex-col shrink-0 shadow-xl overflow-y-auto">
+        <div className="p-6 flex flex-col gap-5">
+          <section className="section-divider">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">Project Asset</label>
+            <label className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-xl bg-slate-900/55 hover:border-[#00D4F5] hover:bg-slate-800/70 cursor-pointer transition-all group">
+              <span className="text-sm font-bold text-slate-200 group-hover:text-[#00D4F5]">Import Schematic</span>
+              <input type="file" className="hidden" accept="image/*" onChange={onUpload} aria-label="Import schematic image" />
+            </label>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-2">PNG, JPG, WEBP up to 50 MB</p>
+          </section>
+
+          {errorMessage ? (
+            <section className="bg-red-950/40 border border-red-500/35 rounded-lg px-3 py-2" role="alert" aria-live="assertive">
+              <p className="text-[11px] font-semibold text-red-200">{errorMessage}</p>
+            </section>
+          ) : null}
+
+          <section className="section-divider">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">Active Tool</label>
+            <div className="grid grid-cols-2 gap-2 bg-slate-900/75 p-1.5 rounded-xl border border-slate-700">
+              <button
+                type="button"
+                onClick={() => onToolChange('wire')}
+                className={`flex items-center justify-center gap-2 text-xs font-semibold py-2.5 rounded-lg transition-all ${currentTool === 'wire' ? 'bg-slate-800 text-[#00D4F5] border border-[#00D4F5]/70' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                <span>✏️</span> WIRE
+              </button>
+              <button
+                type="button"
+                onClick={() => onToolChange('eraser')}
+                className={`flex items-center justify-center gap-2 text-xs font-semibold py-2.5 rounded-lg transition-all ${currentTool === 'eraser' ? 'bg-slate-800 text-red-300 border border-red-400/70' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                <span>🧽</span> ERASER
+              </button>
+            </div>
+          </section>
+
+          <section className="section-divider">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">View &amp; Scale</label>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => onZoomChange(zoom - APP_LIMITS.zoomStep)}
+                aria-label="Zoom out"
+                className="btn-secondary w-10 h-10 rounded-lg text-base font-black"
+              >
+                -
+              </button>
+              <div className="flex-1 h-10 bg-slate-900 border border-slate-600 rounded-lg flex items-center justify-center text-sm font-mono font-bold text-slate-100 shadow-inner">
+                {(zoom * 100).toFixed(0)}%
+              </div>
+              <button
+                type="button"
+                onClick={() => onZoomChange(zoom + APP_LIMITS.zoomStep)}
+                aria-label="Zoom in"
+                className="btn-secondary w-10 h-10 rounded-lg text-base font-black"
+              >
+                +
+              </button>
+            </div>
+          </section>
+
+          <section className="section-divider">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">Wiring Mode</label>
+            <div className="grid grid-cols-2 gap-2 bg-slate-900/75 p-1.5 rounded-xl border border-slate-700">
+              <button
+                type="button"
+                onClick={() => onRoutingModeChange('direct')}
+                className={`text-xs font-semibold py-2.5 rounded-lg transition-all ${routingMode === 'direct' ? 'bg-slate-800 text-[#00D4F5] border border-[#00D4F5]/70' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                DIRECT
+              </button>
+              <button
+                type="button"
+                onClick={() => onRoutingModeChange('orthogonal')}
+                className={`text-xs font-semibold py-2.5 rounded-lg transition-all ${routingMode === 'orthogonal' ? 'bg-slate-800 text-[#00D4F5] border border-[#00D4F5]/70' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                PCB (90°)
+              </button>
+            </div>
+          </section>
+
+          <section className="section-divider">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.14em] mb-3">
+              Render Style
+            </label>
+
+            <div className="grid grid-cols-2 gap-2 bg-slate-900/75 p-1.5 rounded-xl border border-slate-700">
+              <button
+                type="button"
+                onClick={() => setRenderMode('smooth')}
+                className={`text-xs font-semibold py-2.5 rounded-lg ${
+                  renderMode === 'smooth'
+                    ? 'bg-slate-800 text-[#00D4F5] border border-[#00D4F5]/70'
+                    : 'text-slate-400'
+                }`}
+              >
+                SMOOTH
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRenderMode('rigid')}
+                className={`text-xs font-semibold py-2.5 rounded-lg ${
+                  renderMode === 'rigid'
+                    ? 'bg-slate-800 text-[#00D4F5] border border-[#00D4F5]/70'
+                    : 'text-slate-400'
+                }`}
+              >
+                RIGID
+              </button>
+            </div>
+          </section>
+
+          <section className="section-divider flex flex-col gap-6">
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-xs font-semibold text-slate-300 uppercase tracking-[0.14em]">Wire Color</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-300 font-mono bg-slate-900 px-1.5 py-0.5 rounded border border-slate-700">{currentColor.toUpperCase()}</span>
+                  <input
+                    type="color"
+                    value={currentColor}
+                    onChange={(e) => onColorChange(e.target.value)}
+                    className="w-8 h-8 p-0.5 border border-slate-500 bg-slate-900 cursor-pointer rounded-lg overflow-hidden"
+                    aria-label="Wire color picker"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-6 gap-2">
+                {Object.entries(WireColor).map(([name, value]) => (
+                  <button
+                    type="button"
+                    key={name}
+                    onClick={() => onColorChange(value)}
+                    className={`w-full aspect-square rounded-lg border-2 transition-all ${currentColor === value ? 'border-[#00D4F5] scale-105 shadow-md ring-1 ring-cyan-200/30' : 'border-slate-600 hover:border-slate-400'}`}
+                    style={{ backgroundColor: value }}
+                    title={ColorNames[value] || name}
+                    aria-label={`Set color ${ColorNames[value] || name}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-xs font-semibold text-slate-300 uppercase tracking-[0.14em]">Thickness</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={APP_LIMITS.minThickness}
+                    max={APP_LIMITS.maxThickness}
+                    value={thickness}
+                    onChange={(e) => onThicknessChange(e.target.value)}
+                    className="w-20 h-10 px-2 text-base font-black border-2 border-slate-500 rounded-lg text-center text-slate-100 bg-slate-900 outline-none focus:border-[#00D4F5] focus:ring-2 focus:ring-cyan-200/35 shadow-md transition-all"
+                    aria-label="Wire thickness"
+                  />
+                  <span className="text-[10px] font-black text-slate-400">PX</span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={APP_LIMITS.minThickness}
+                max={APP_LIMITS.maxThickness}
+                value={thickness}
+                onChange={(e) => onThicknessChange(e.target.value)}
+                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#00D4F5] border border-slate-600"
+                aria-label="Wire thickness slider"
+              />
+            </div>
+          </section>
+
+          <div className="p-4 bg-slate-900/75 rounded-xl border border-slate-700 flex flex-col gap-3">
+            <div className="flex justify-between items-center border-b border-slate-700 pb-2">
+              <span className="text-xs font-semibold text-slate-400">Total Wires</span>
+              <span className="text-sm font-black text-slate-100 font-mono">{wireCount}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-slate-400">Status</span>
+              <span className={`text-[10px] px-2 py-1 rounded-md font-semibold uppercase tracking-[0.08em] ${isDrawing ? 'bg-[#F5A623] text-slate-900' : 'bg-[#00D4F5] text-slate-900'}`}>
+                {isDrawing ? 'Drawing' : 'Idle'}
+              </span>
+            </div>
+          </div>
+
+          <section className="mt-auto flex flex-col gap-3 pb-3">
+            <button
+              type="button"
+              onClick={onExport}
+              disabled={!hasImage}
+              className="btn-primary w-full py-3.5 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-semibold rounded-xl tracking-wide"
+            >
+              Export Schematic
+            </button>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={onUndo}
+                disabled={!canUndo}
+                className="btn-secondary py-2.5 disabled:opacity-40 disabled:cursor-not-allowed text-[11px] font-semibold rounded-lg tracking-wide shadow-sm"
+              >
+                Undo (Z)
+              </button>
+              <button
+                type="button"
+                onClick={onClear}
+                disabled={!canUndo}
+                className="btn-danger py-2.5 disabled:opacity-40 disabled:cursor-not-allowed text-[11px] font-semibold rounded-lg tracking-wide shadow-sm"
+              >
+                Clear All
+              </button>
+            </div>
+          </section>
+        </div>
+      </aside>
+    );
+
+    const WiringCanvas = ({
+      image,
+      wires,
+      activePoints,
+      currentColor,
+      currentThickness,
+      onPointClick,
+      onFinish,
+      zoom,
+      onZoomUpdate,
+      routingMode,
+      renderMode,
+      currentTool,
+    }) => {
+      const containerRef = useRef(null);
+      const imageCanvasRef = useRef(null);
+      const wireCanvasRef = useRef(null);
+      const mouseRafRef = useRef(0);
+      const mousePointRef = useRef(null);
+
+      const [mousePos, setMousePos] = useState(null);
+      const [pan, setPan] = useState({ x: 0, y: 0 });
+      const [isPanning, setIsPanning] = useState(false);
+      const [isSpaceDown, setIsSpaceDown] = useState(false);
+      const [lastMousePos, setLastMousePos] = useState(null);
+
+      useEffect(() => {
+        const handleKeyDown = (event) => {
+          if (event.code === 'Space' && !isEditableElement(event.target)) {
+            event.preventDefault();
+            setIsSpaceDown(true);
+          }
+        };
+
+        const handleKeyUp = (event) => {
+          if (event.code === 'Space') {
+            setIsSpaceDown(false);
+            setIsPanning(false);
+            setLastMousePos(null);
+          }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+          window.removeEventListener('keyup', handleKeyUp);
+        };
+      }, []);
+
+      useEffect(() => {
+        const handleWindowMouseUp = () => {
+          setIsPanning(false);
+          setLastMousePos(null);
+        };
+
+        window.addEventListener('mouseup', handleWindowMouseUp);
+        return () => window.removeEventListener('mouseup', handleWindowMouseUp);
+      }, []);
+
+      useEffect(() => {
+        if (!image || !imageCanvasRef.current || !wireCanvasRef.current) return;
+
+        const { naturalWidth, naturalHeight } = image;
+        imageCanvasRef.current.width = naturalWidth;
+        imageCanvasRef.current.height = naturalHeight;
+        wireCanvasRef.current.width = naturalWidth;
+        wireCanvasRef.current.height = naturalHeight;
+
+        const imgCtx = imageCanvasRef.current.getContext('2d', { alpha: false });
+        if (imgCtx) {
+          imgCtx.imageSmoothingEnabled = true;
+          imgCtx.clearRect(0, 0, naturalWidth, naturalHeight);
+          imgCtx.drawImage(image, 0, 0);
+        }
+
+        if (containerRef.current) {
+          const container = containerRef.current;
+          setPan({
+            x: (container.clientWidth - naturalWidth * zoom) / 2,
+            y: (container.clientHeight - naturalHeight * zoom) / 2,
+          });
+        }
+      }, [image]);
+
+      const flushMouseMove = useCallback(() => {
+        mouseRafRef.current = 0;
+        setMousePos(mousePointRef.current);
+      }, []);
+
+      const queueMouseUpdate = useCallback((point) => {
+        mousePointRef.current = point;
+        if (!mouseRafRef.current) {
+          mouseRafRef.current = window.requestAnimationFrame(flushMouseMove);
+        }
+      }, [flushMouseMove]);
+
+      useEffect(() => {
+        return () => {
+          if (mouseRafRef.current) {
+            window.cancelAnimationFrame(mouseRafRef.current);
+          }
+        };
+      }, []);
+
+      const render = useCallback(() => {
+        if (!wireCanvasRef.current) return;
+        const ctx = wireCanvasRef.current.getContext('2d');
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, wireCanvasRef.current.width, wireCanvasRef.current.height);
+
+        // FIX: unified smoothing pipeline
+        wires.forEach((wire) => drawWireTrace(ctx, wire.points, wire.color, wire.thickness, {
+          drawNodes: false,
+          renderMode,
+        }));
+
+        wires.forEach((wire) => {
+          const pts = wire.points;
+          if (!pts || !pts.length) return;
+
+          ctx.save();
+          ctx.fillStyle = wire.color;
+
+          if (renderMode === 'rigid') {
+            pts.forEach((point) => {
+              ctx.beginPath();
+              ctx.arc(point.x, point.y, Math.max(2, wire.thickness * 0.6), 0, Math.PI * 2);
+              ctx.fill();
+            });
+          } else {
+            const start = pts[0];
+            const end = pts[pts.length - 1];
+            const radius = Math.max(3, wire.thickness);
+
+            ctx.beginPath();
+            ctx.arc(start.x, start.y, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (pts.length > 1) {
+              ctx.beginPath();
+              ctx.arc(end.x, end.y, radius, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          ctx.restore();
+        });
+
+        if (currentTool === 'wire' && mousePos && !isPanning && !isSpaceDown) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+          ctx.lineWidth = 2 / zoom;
+          ctx.setLineDash([2 / zoom, 4 / zoom]);
+          ctx.moveTo(0, mousePos.y);
+          ctx.lineTo(wireCanvasRef.current.width, mousePos.y);
+          ctx.moveTo(mousePos.x, 0);
+          ctx.lineTo(mousePos.x, wireCanvasRef.current.height);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+          ctx.lineWidth = 1 / zoom;
+          ctx.setLineDash([2 / zoom, 4 / zoom]);
+          ctx.moveTo(0, mousePos.y);
+          ctx.lineTo(wireCanvasRef.current.width, mousePos.y);
+          ctx.moveTo(mousePos.x, 0);
+          ctx.lineTo(mousePos.x, wireCanvasRef.current.height);
+          ctx.stroke();
+          ctx.restore();
+
+          if (activePoints.length > 0) {
+            // FIX: unified smoothing pipeline
+            drawWireTrace(ctx, activePoints, currentColor, currentThickness, {
+              drawNodes: false,
+              renderMode,
+            });
+            const lastPoint = activePoints[activePoints.length - 1];
+
+            const previewPoints = routingMode === 'orthogonal'
+              ? [
+                  { x: lastPoint.x, y: lastPoint.y },
+                  { x: mousePos.x, y: lastPoint.y },
+                  { x: mousePos.x, y: mousePos.y },
+                ]
+              : [
+                  { x: lastPoint.x, y: lastPoint.y },
+                  { x: mousePos.x, y: mousePos.y },
+                ];
+
+            // FIX: unified smoothing pipeline
+            drawWireTrace(ctx, previewPoints, currentColor, currentThickness, {
+              dashPattern: [12 / zoom, 8 / zoom],
+              drawNodes: false,
+              opacity: 0.7,
+              renderMode,
+            });
+          }
+        }
+
+        if (currentTool === 'eraser' && mousePos && !isPanning && !isSpaceDown) {
+          const outerRadius = 12 / zoom;
+          const innerRadius = 10 / zoom;
+
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+          ctx.lineWidth = 3 / zoom;
+          ctx.arc(mousePos.x, mousePos.y, outerRadius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(239,68,68,1)';
+          ctx.arc(mousePos.x, mousePos.y, innerRadius, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }, [wires, currentTool, mousePos, isPanning, isSpaceDown, zoom, activePoints, currentColor, currentThickness, routingMode, renderMode]);
+
+      useEffect(() => {
+        render();
+      }, [render]);
+
+      const getCanvasPoint = (event) => {
+        const canvas = wireCanvasRef.current;
+        if (!canvas) return null;
+
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+
+        return {
+          x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+          y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+        };
+      };
+
+      const handleMouseDown = (event) => {
+        if (event.button === 1 || (event.button === 0 && (event.altKey || isSpaceDown))) {
+          setIsPanning(true);
+          setLastMousePos({ x: event.clientX, y: event.clientY });
+          event.preventDefault();
+        }
+      };
+
+      const handleMouseMove = (event) => {
+        if (isPanning && lastMousePos) {
+          const deltaX = event.clientX - lastMousePos.x;
+          const deltaY = event.clientY - lastMousePos.y;
+
+          setPan((previous) => ({
+            x: previous.x + deltaX,
+            y: previous.y + deltaY,
+          }));
+
+          setLastMousePos({ x: event.clientX, y: event.clientY });
+        }
+
+        const point = getCanvasPoint(event);
+        if (point) queueMouseUpdate(point);
+      };
+
+      const handleMouseUp = () => {
+        setIsPanning(false);
+        setLastMousePos(null);
+      };
+
+      const handleWheel = (event) => {
+        event.preventDefault();
+
+        const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
+        const nextZoom = clamp(zoom * zoomFactor, APP_LIMITS.minZoom, APP_LIMITS.maxZoom);
+        if (nextZoom === zoom) return;
+
+        if (containerRef.current) {
+          const rect = containerRef.current.getBoundingClientRect();
+          const mouseX = event.clientX - rect.left;
+          const mouseY = event.clientY - rect.top;
+
+          setPan((previous) => ({
+            x: mouseX - (mouseX - previous.x) * (nextZoom / zoom),
+            y: mouseY - (mouseY - previous.y) * (nextZoom / zoom),
+          }));
+        }
+
+        onZoomUpdate(nextZoom);
+      };
+
+      let cursorClass = 'cursor-crosshair';
+      if (isPanning) cursorClass = 'cursor-grabbing';
+      else if (isSpaceDown) cursorClass = 'cursor-grab';
+      else if (currentTool === 'eraser') cursorClass = 'cursor-none';
+
+      return (
+        <div
+          ref={containerRef}
+          className={`w-full h-full ${cursorClass} overflow-hidden select-none relative canvas-surface`}
+          onWheel={handleWheel}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={() => {
+            setMousePos(null);
+            setIsPanning(false);
+            setLastMousePos(null);
+          }}
+          onDoubleClick={onFinish}
+        >
+          <div
+            className="absolute pointer-events-none transition-transform duration-75 ease-out"
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transformOrigin: '0 0',
+              width: image.naturalWidth,
+              height: image.naturalHeight,
+            }}
+          >
+            <canvas ref={imageCanvasRef} className="block shadow-[0_0_100px_rgba(0,0,0,0.5)] bg-black" />
+            <canvas
+              ref={wireCanvasRef}
+              className="absolute top-0 left-0 w-full h-full pointer-events-auto"
+              onClick={(event) => {
+                if (event.button === 0 && !event.altKey && !isSpaceDown && !isPanning) {
+                  const point = getCanvasPoint(event);
+                  if (point) onPointClick(point);
+                }
+              }}
+            />
+          </div>
+
+          <div className="absolute top-5 right-5 bg-slate-950/78 text-white p-3.5 rounded-lg border border-slate-700/80 text-[11px] font-mono pointer-events-none backdrop-blur-sm shadow-lg min-w-[168px]">
+            <div className="flex justify-between gap-6 mb-2"><span className="text-slate-400 font-semibold tracking-wide">X</span> <span className="text-[#00D4F5] font-semibold">{mousePos ? Math.round(mousePos.x) : 0}</span></div>
+            <div className="flex justify-between gap-6 mb-2"><span className="text-slate-400 font-semibold tracking-wide">Y</span> <span className="text-[#00D4F5] font-semibold">{mousePos ? Math.round(mousePos.y) : 0}</span></div>
+            <div className="h-px bg-white/20 my-2"></div>
+            <div className="flex justify-between gap-6 mb-2"><span className="text-slate-400 font-semibold tracking-wide">Zoom</span> <span className="font-semibold text-white">{(zoom * 100).toFixed(0)}%</span></div>
+            <div className="flex justify-between gap-6 text-[10px]"><span className="text-slate-400 font-semibold tracking-wide">Tool</span> <span className={`${currentTool === 'eraser' ? 'text-red-400' : 'text-[#00D4F5]'} font-semibold`}>{currentTool.toUpperCase()}</span></div>
+          </div>
+
+          <div className="absolute bottom-5 left-5 bg-slate-950/76 text-slate-300 px-4 py-2.5 rounded-xl text-[10px] font-semibold pointer-events-none backdrop-blur-sm border border-slate-700/80 shadow-lg tracking-wide">
+            <span className="text-[#00D4F5]">Ctrl+Z</span> Undo • <span className="text-[#F5A623]">Double-click</span> Finish • <span className="text-slate-200">Space/Alt</span> Pan
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      const [image, setImage] = useState(null);
+      const [wires, setWires] = useState([]);
+      const [currentColor, setCurrentColor] = useState(WireColor.Red);
+      const [thickness, setThickness] = useState(3);
+      const [activePoints, setActivePoints] = useState([]);
+      const [zoom, setZoom] = useState(1);
+      const [routingMode, setRoutingMode] = useState('orthogonal');
+      const [renderMode, setRenderMode] = useState('smooth');
+      const [currentTool, setCurrentTool] = useState('wire');
+      const [errorMessage, setErrorMessage] = useState('');
+      const uploadTokenRef = useRef(0);
+
+      const applyThickness = useCallback((value) => {
+        const numeric = Number.parseInt(String(value), 10);
+        const normalized = Number.isNaN(numeric) ? APP_LIMITS.minThickness : numeric;
+        setThickness(clamp(normalized, APP_LIMITS.minThickness, APP_LIMITS.maxThickness));
+      }, []);
+
+      const applyZoom = useCallback((value) => {
+        setZoom(clamp(value, APP_LIMITS.minZoom, APP_LIMITS.maxZoom));
+      }, []);
+
+      const clearWorkspace = useCallback(() => {
+        setWires([]);
+        setActivePoints([]);
+      }, []);
+
+      const undo = useCallback(() => {
+        setActivePoints((previousPoints) => {
+          if (previousPoints.length > 0) {
+            return previousPoints.slice(0, -1);
+          }
+
+          setWires((previousWires) => {
+            if (previousWires.length === 0) return previousWires;
+            return previousWires.slice(0, -1);
+          });
+
+          return previousPoints;
+        });
+      }, []);
+
+      const finalizeWire = useCallback(() => {
+        if (currentTool === 'eraser') return;
+        // FIX: unified smoothing pipeline
+        const minPointSpacing = getTraceMinSpacing(thickness);
+        const finalizedPoints = normalizeTracePoints(activePoints, minPointSpacing);
+
+        if (finalizedPoints.length < 2) {
+          setActivePoints([]);
+          return;
+        }
+
+        const newWire = {
+          id: createWireId(),
+          points: finalizedPoints,
+          color: currentColor,
+          thickness,
+          mode: routingMode,
+        };
+
+        setWires((previous) => [...previous, newWire]);
+        setActivePoints([]);
+      }, [currentTool, activePoints, currentColor, thickness, routingMode]);
+
+      useEffect(() => {
+        const handleKeyDown = (event) => {
+          if (isEditableElement(event.target)) return;
+
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            undo();
+            return;
+          }
+
+          if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            undo();
+          }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [undo]);
+
+      useEffect(() => {
+        if (!errorMessage) return undefined;
+        const timeoutId = window.setTimeout(() => setErrorMessage(''), 6000);
+        return () => window.clearTimeout(timeoutId);
+      }, [errorMessage]);
+
+      const handleImageUpload = useCallback((event) => {
+        const input = event.target;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        uploadTokenRef.current += 1;
+        const uploadToken = uploadTokenRef.current;
+
+        setErrorMessage('');
+
+        if (!file.type.startsWith('image/')) {
+          setErrorMessage('Unsupported file type. Please select an image file.');
+          input.value = '';
+          return;
+        }
+
+        if (file.size > APP_LIMITS.maxUploadBytes) {
+          setErrorMessage('Image is too large. Use a file smaller than 50 MB.');
+          input.value = '';
+          return;
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          if (uploadToken !== uploadTokenRef.current) return;
+          setImage(img);
+          setWires([]);
+          setActivePoints([]);
+          setCurrentTool('wire');
+          setZoom(1);
+          setErrorMessage('');
+        };
+
+        img.onerror = (error) => {
+          URL.revokeObjectURL(objectUrl);
+          if (uploadToken !== uploadTokenRef.current) return;
+          setErrorMessage('Failed to load image. Please try a different file.');
+          logError('image-upload', error);
+        };
+
+        img.src = objectUrl;
+        input.value = '';
+      }, []);
+
+      const getDistanceToSegment = useCallback((point, segmentStart, segmentEnd) => {
+        const lengthSquared = (segmentStart.x - segmentEnd.x) ** 2 + (segmentStart.y - segmentEnd.y) ** 2;
+        if (lengthSquared === 0) {
+          return Math.hypot(point.x - segmentStart.x, point.y - segmentStart.y);
+        }
+
+        let ratio = ((point.x - segmentStart.x) * (segmentEnd.x - segmentStart.x) + (point.y - segmentStart.y) * (segmentEnd.y - segmentStart.y)) / lengthSquared;
+        ratio = clamp(ratio, 0, 1);
+
+        const projectedX = segmentStart.x + ratio * (segmentEnd.x - segmentStart.x);
+        const projectedY = segmentStart.y + ratio * (segmentEnd.y - segmentStart.y);
+        return Math.hypot(point.x - projectedX, point.y - projectedY);
+      }, []);
+
+      const handleCanvasClick = useCallback((point) => {
+        if (!image) return;
+
+        if (currentTool === 'eraser') {
+          setWires((previousWires) => previousWires.filter((wire) => {
+            for (let index = 0; index < wire.points.length - 1; index += 1) {
+              const distance = getDistanceToSegment(point, wire.points[index], wire.points[index + 1]);
+              if (distance < (wire.thickness / 2) + APP_LIMITS.eraseThreshold) {
+                return false;
+              }
+            }
+            return true;
+          }));
+          return;
+        }
+
+        setActivePoints((previous) => {
+          if (previous.length === 0) {
+            return [point];
+          }
+
+          const lastPoint = previous[previous.length - 1];
+          if (routingMode === 'orthogonal' && point.x !== lastPoint.x && point.y !== lastPoint.y) {
+            const corner = { x: point.x, y: lastPoint.y };
+            return [...previous, corner, point];
+          }
+
+          return [...previous, point];
+        });
+      }, [image, currentTool, getDistanceToSegment, routingMode]);
+
+      const exportImage = useCallback(async () => {
+        if (!image) {
+          setErrorMessage('No image loaded to export.');
+          return;
+        }
+
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = image.naturalWidth;
+          canvas.height = image.naturalHeight;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('Unable to initialize export context.');
+          }
+
+          ctx.drawImage(image, 0, 0);
+
+          // FIX: unified smoothing pipeline
+          wires.forEach((wire) => drawWireTrace(ctx, wire.points, wire.color, wire.thickness, {
+            drawNodes: false,
+            renderMode,
+          }));
+
+          const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((result) => {
+              if (!result) {
+                reject(new Error('Canvas export returned an empty blob.'));
+                return;
+              }
+              resolve(result);
+            }, 'image/png');
+          });
+
+          const objectUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `schemflow_export_${Date.now()}.png`;
+          link.href = objectUrl;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(objectUrl);
+        } catch (error) {
+          setErrorMessage('Export failed. Please retry.');
+          logError('image-export', error);
+        }
+      }, [image, wires, renderMode]);
+
+      const hasImage = Boolean(image);
+      const canUndo = activePoints.length > 0 || wires.length > 0;
+
+      return (
+        <div className="flex flex-col h-screen overflow-hidden bg-slate-950">
+          <Header />
+          <main className="flex flex-1 overflow-hidden">
+            <Sidebar
+              onUpload={handleImageUpload}
+              currentColor={currentColor}
+              onColorChange={setCurrentColor}
+              thickness={thickness}
+              onThicknessChange={applyThickness}
+              onClear={clearWorkspace}
+              onUndo={undo}
+              wireCount={wires.length}
+              isDrawing={activePoints.length > 0}
+              zoom={zoom}
+              onZoomChange={applyZoom}
+              routingMode={routingMode}
+              onRoutingModeChange={setRoutingMode}
+              renderMode={renderMode}
+              setRenderMode={setRenderMode}
+              onExport={exportImage}
+              hasImage={hasImage}
+              canUndo={canUndo}
+              currentTool={currentTool}
+              onToolChange={setCurrentTool}
+              errorMessage={errorMessage}
+            />
+
+            <div className="flex-1 relative canvas-surface overflow-hidden flex items-center justify-center">
+              {!hasImage ? (
+                <div className="text-center p-10 border border-dashed border-slate-600 rounded-2xl bg-slate-900/60 max-w-md shadow-[0_12px_24px_rgba(0,0,0,0.25)]">
+                  <h2 className="text-xl font-bold text-slate-100 mb-2">Workspace Ready</h2>
+                  <p className="text-slate-400 mb-1.5 text-sm leading-relaxed">Upload a schematic or PCB image to start routing precision traces with orthogonal locking.</p>
+                  <p className="text-slate-500 mb-5 text-xs leading-relaxed">Supports PCB layouts, circuit diagrams, and engineering schematics</p>
+                  <label className="btn-primary px-7 py-3 rounded-full font-semibold cursor-pointer transition-all shadow-md inline-flex text-xs tracking-wide">
+                    Select Source Asset
+                    <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  </label>
+                </div>
+              ) : (
+                <WiringCanvas
+                  image={image}
+                  wires={wires}
+                  activePoints={activePoints}
+                  currentColor={currentColor}
+                  currentThickness={thickness}
+                  onPointClick={handleCanvasClick}
+                  onFinish={finalizeWire}
+                  zoom={zoom}
+                  onZoomUpdate={applyZoom}
+                  routingMode={routingMode}
+                  renderMode={renderMode}
+                  currentTool={currentTool}
+                />
+              )}
+            </div>
+          </main>
+
+          <section className="shrink-0 border-t border-slate-800 bg-slate-950/70 px-8 py-3">
+            <div className="mx-auto max-w-5xl space-y-2 text-xs leading-relaxed text-slate-400">
+              <p><span className="text-slate-200 font-semibold">What is SchemFlow?</span> SchemFlow is a precision schematic annotation tool for engineers to draw, edit, and export wire overlays.</p>
+              <p><span className="text-slate-200 font-semibold">How to use SchemFlow?</span> Upload a schematic image, draw wires using the canvas, and export the final annotated design.</p>
+            </div>
+          </section>
+
+          <footer className="bg-slate-900 border-t border-slate-700 py-2.5 px-8 text-xs text-slate-300 flex justify-between items-center shrink-0 z-20">
+            <div className="flex gap-6 items-center">
+              <span className="font-semibold text-slate-500 tracking-wide text-[11px]">SchemFlow CAD v2.6</span>
+              <div className="h-4 w-px bg-slate-700"></div>
+              <span className="text-[#00D4F5] font-semibold tracking-wide bg-[#0b2b31]/55 px-2.5 py-1 rounded border border-[#00D4F5]/30">Ctrl+Z Undo</span>
+            </div>
+            <div className="flex gap-4 items-center text-[11px] font-medium">
+              <span className="text-slate-400">Double-click finish</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-slate-400">Scroll zoom</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-slate-400">Built by <span className="text-[#00D4F5] font-semibold">BlinkNBuild</span></span>
+            </div>
+          </footer>
+        </div>
+      );
+    };
+
+    const mountNode = document.getElementById('root');
+    if (mountNode) {
+      const root = ReactDOM.createRoot(mountNode);
+      root.render(<App />);
+    } else {
+      logError('bootstrap', new Error('Missing root mount element.'));
+    }
+  </script>
+</body>
+</html>
