@@ -82,8 +82,7 @@
 
 ## 👨‍💻 Author
 
-Built by **BlinkNBuild**
-Creator: Sujan
+**SUJAN S**
 
 ---
 
